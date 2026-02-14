@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>JOKGEN Rei</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background: linear-gradient(135deg,#0f172a,#1e293b);
+  color: white;
+  margin: 0;
+}
+
+.container {
+  max-width: 450px;
+  margin: auto;
+  padding: 20px;
+}
+
+.logo {
+  text-align: center;
+  font-size: 28px;
+  font-weight: bold;
+  margin-bottom: 5px;
+  color: #22c55e;
+  text-shadow: 0 0 10px #22c55e88;
+}
+
+.tagline {
+  text-align: center;
+  font-size: 14px;
+  color: #94a3b8;
+  margin-bottom: 20px;
+}
+
+.card-box {
+  background: #1e293b;
+  padding: 15px;
+  border-radius: 12px;
+  margin-bottom: 15px;
+  box-shadow: 0 0 15px #00000055;
+}
+
+input, select, button {
+  width: 100%;
+  padding: 12px;
+  margin: 6px 0;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+}
+
+button {
+  background: linear-gradient(90deg,#22c55e,#16a34a);
+  color: white;
+  font-weight: bold;
+}
+
+.copy-btn {
+  background: #2563eb;
+}
+
+.total-box {
+  background: #0f172a;
+  padding: 10px;
+  border-radius: 8px;
+  text-align: center;
+  margin-top: 5px;
+  font-weight: bold;
+  color: #22c55e;
+}
+
+.antrian-card {
+  background: #0f172a;
+  padding: 12px;
+  border-radius: 10px;
+  margin-top: 10px;
+}
+
+.status-wait { color: yellow; }
+.status-paid { color: #22c55e; }
+.status-reject { color: #ef4444; }
+
+.small-btn {
+  margin-top:5px;
+  font-size:13px;
+}
+.delete { background:#ef4444; }
+.acc { background:#16a34a; }
+.reject { background:#f59e0b; }
+
+.footer {
+  text-align:center;
+  font-size:12px;
+  margin-top:20px;
+  color:#64748b;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="logo">🔥 JOKGEN Rei 🔥</div>
+<div class="tagline">Trusted • Fast Process • 100% Aman</div>
+
+<div class="card-box">
+<b>💳 METODE PEMBAYARAN</b><br><br>
+Transfer DANA ke:<br>
+<span style="font-size:18px;color:#22c55e;font-weight:bold;">
+083817235398
+</span>
+<button class="copy-btn" onclick="copyDana()">Copy Nomor</button>
+<br><br>
+⚠️ Transfer sesuai total harga & upload bukti jelas.
+</div>
+
+<div class="card-box">
+<input type="text" id="nama" placeholder="Nama Pembeli">
+<select id="mode" onchange="hitungTotal()">
+  <option value="">Pilih Mode</option>
+  <option value="8000">Inferno - Rp 8.000</option>
+  <option value="6000">Dark Cave Port - Rp 6.000</option>
+</select>
+<input type="number" id="match" placeholder="Jumlah Match" oninput="hitungTotal()">
+<div class="total-box" id="totalBox">Total: Rp 0</div>
+<input type="file" id="bukti" accept="image/*">
+<button onclick="tambah()">Tambah ke Antrian</button>
+</div>
+
+<h3>📋 Daftar Antrian</h3>
+<div id="list"></div>
+
+<div class="footer">
+© 2025 JOKGEN Rei • All Rights Reserved
+</div>
+
+</div>
+
+<script>
+let data = JSON.parse(localStorage.getItem("jokgen")) || [];
+
+function save(){
+  localStorage.setItem("jokgen", JSON.stringify(data));
+}
+
+function copyDana(){
+  navigator.clipboard.writeText("083817235398");
+  alert("Nomor berhasil disalin!");
+}
+
+function hitungTotal(){
+  const harga = parseInt(document.getElementById("mode").value) || 0;
+  const match = parseInt(document.getElementById("match").value) || 0;
+  document.getElementById("totalBox").innerText =
+    "Total: Rp " + (harga * match);
+}
+
+function render(){
+  const list = document.getElementById("list");
+  list.innerHTML = "";
+
+  data.forEach((item,i)=>{
+    let statusClass="status-wait";
+    if(item.status==="Dibayar") statusClass="status-paid";
+    if(item.status==="Ditolak") statusClass="status-reject";
+
+    const div = document.createElement("div");
+    div.className="antrian-card";
+    div.innerHTML=`
+      <b>No:</b> ${i+1}<br>
+      <b>Nama:</b> ${item.nama}<br>
+      <b>Mode:</b> ${item.mode}<br>
+      <b>Match:</b> ${item.match}<br>
+      <b>Total:</b> Rp ${item.total}<br>
+      <span class="${statusClass}">${item.status}</span><br>
+      <a href="${item.bukti}" target="_blank">📎 Lihat Bukti</a>
+    `;
+
+    const acc=document.createElement("button");
+    acc.innerText="ACC";
+    acc.className="small-btn acc";
+    acc.onclick=()=>{data[i].status="Dibayar"; save(); render();}
+
+    const reject=document.createElement("button");
+    reject.innerText="Tolak";
+    reject.className="small-btn reject";
+    reject.onclick=()=>{data[i].status="Ditolak"; save(); render();}
+
+    const del=document.createElement("button");
+    del.innerText="Hapus";
+    del.className="small-btn delete";
+    del.onclick=()=>{data.splice(i,1); save(); render();}
+
+    div.appendChild(acc);
+    div.appendChild(reject);
+    div.appendChild(del);
+
+    list.appendChild(div);
+  });
+}
+
+function tambah(){
+  const nama=document.getElementById("nama").value;
+  const modeSelect=document.getElementById("mode");
+  const harga=parseInt(modeSelect.value);
+  const modeText=modeSelect.options[modeSelect.selectedIndex].text;
+  const match=parseInt(document.getElementById("match").value);
+  const file=document.getElementById("bukti").files[0];
+
+  if(!nama || !harga || !match || !file){
+    alert("Lengkapi semua data & upload bukti!");
+    return;
+  }
+
+  if(!file.type.startsWith("image/")){
+    alert("File harus gambar!");
+    return;
+  }
+
+  if(file.size > 2*1024*1024){
+    alert("Maksimal 2MB!");
+    return;
+  }
+
+  const reader=new FileReader();
+  reader.onload=function(e){
+    data.push({
+      nama:nama,
+      mode:modeText,
+      match:match,
+      total:harga*match,
+      status:"Menunggu",
+      bukti:e.target.result
+    });
+
+    save();
+    render();
+    document.getElementById("nama").value="";
+    document.getElementById("mode").value="";
+    document.getElementById("match").value="";
+    document.getElementById("bukti").value="";
+    hitungTotal();
+  }
+  reader.readAsDataURL(file);
+}
+
+render();
+</script>
+
+</body>
+</html>
