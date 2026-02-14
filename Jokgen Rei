@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JOKGEN Rei</title>
+<style>
+body{margin:0;font-family:Arial,sans-serif;background:linear-gradient(180deg,#0f1b2e,#1b2c4a);color:white;}
+.container{max-width:420px;margin:20px auto;padding:15px;}
+h1{text-align:center;color:#22c55e;font-size:28px;margin-bottom:5px;}
+.subtitle{text-align:center;opacity:0.8;margin-bottom:20px;}
+.nav-buttons{display:flex;justify-content:space-between;margin-bottom:15px;flex-wrap:wrap;gap:5px;}
+.nav-buttons button{flex:1;padding:10px;border:none;border-radius:12px;font-weight:bold;cursor:pointer;}
+.active-btn{background:#22c55e;color:white;}
+.inactive-btn{background:#1e293b;color:white;}
+.card{background:#1e293b;padding:20px;border-radius:20px;margin-bottom:20px;box-shadow:0 10px 25px rgba(0,0,0,0.3);}
+.green{color:#22c55e;font-weight:bold;}
+button.general{width:100%;padding:12px;border:none;border-radius:12px;font-size:16px;cursor:pointer;margin-top:10px;}
+.btn-blue{background:#2563eb;color:white;}
+.btn-green{background:linear-gradient(90deg,#22c55e,#16a34a);color:white;}
+input,select{width:100%;padding:12px;border-radius:12px;border:none;margin-top:10px;font-size:15px;}
+.total-box{background:#0f172a;padding:15px;border-radius:12px;text-align:center;margin-top:15px;font-size:18px;}
+.order{background:#0f172a;padding:15px;border-radius:12px;margin-top:10px;}
+.order b{color:#22c55e;}
+.order img{max-width:100%;border-radius:12px;margin-top:10px;}
+.modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);justify-content:center;align-items:center;z-index:1000;}
+.modal-content{background:#1e293b;padding:20px;border-radius:20px;width:90%;max-width:350px;text-align:center;box-shadow:0 10px 25px rgba(0,0,0,0.5);}
+.modal input{width:100%;margin-top:10px;}
+.modal button{margin-top:10px;}
+.status-waiting{color:yellow;}
+.status-joki{color:#4facfe;}
+.status-done{color:#22c55e;}
+.status-reject{color:#f44336;}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<h1>🔥 JOKGEN Rei 🔥</h1>
+<div class="subtitle">Trusted • Fast Process • 100% Aman</div>
+
+<!-- Tombol Login Owner & Admin -->
+<div style="text-align:center;margin-bottom:10px;">
+  <button class="btn-blue general" onclick="showOwnerModal()" id="ownerLoginBtn">Login Owner</button>
+  <button class="btn-blue general" onclick="showAdminModal()" id="adminLoginBtn">Login Admin</button>
+  <button class="btn-blue general" onclick="logout()" id="logoutBtn" style="display:none;">Logout</button>
+</div>
+
+<div class="nav-buttons" id="navButtons">
+  <button id="btnOrder" class="active-btn" onclick="showPage('order')">Order Form</button>
+  <button id="btnQueue" class="inactive-btn" onclick="showPage('queue')">Antrian Joki</button>
+  <button id="btnHistory" class="inactive-btn" onclick="showPage('history')">History Order</button>
+</div>
+
+<!-- PAGE ORDER -->
+<div id="pageOrder">
+  <div class="card">
+    <h3>💳 METODE PEMBAYARAN</h3>
+    <p>Transfer DANA ke:</p>
+    <p class="green">083817235398</p>
+    <button class="btn-blue general" onclick="copyNumber()">Copy Nomor</button>
+    <p style="margin-top:15px;opacity:0.8;">⚠️ Transfer sesuai total harga & upload bukti jelas.</p>
+  </div>
+  <div class="card">
+    <input type="text" id="nama" placeholder="Nama Pembeli">
+    <input type="text" id="whatsapp" placeholder="No WhatsApp">
+    <select id="mode">
+      <option value="8000">Inferno - Rp 8.000</option>
+      <option value="6000">Dark Cave Port - Rp 6.000</option>
+    </select>
+    <input type="number" id="match" placeholder="Jumlah Match" min="1">
+    <div class="total-box">
+      Total: <span class="green">Rp <span id="total">0</span></span>
+    </div>
+    <input type="file" id="bukti">
+    <button class="btn-green general" onclick="tambahOrder()">Tambah ke Antrian</button>
+  </div>
+</div>
+
+<!-- PAGE ANTRIAN JOKI -->
+<div id="pageQueue" style="display:none;">
+  <h3>📋 Antrian Joki</h3>
+  <div id="listQueue"></div>
+</div>
+
+<!-- PAGE HISTORY -->
+<div id="pageHistory" style="display:none;">
+  <h3>📋 History Order (Selesai)</h3>
+  <div id="listHistory"></div>
+</div>
+
+<!-- PAGE ADMIN ANTRIAN -->
+<div id="pageAdmin" style="display:none;">
+  <h3>📋 Admin Antrian</h3>
+  <div id="listAdmin"></div>
+</div>
+
+<!-- PAGE KONFIRMASI TRANSAKSI -->
+<div id="pageConfirm" style="display:none;">
+  <h3>🔐 Konfirmasi Transaksi</h3>
+  <div id="listConfirm"></div>
+  <button class="btn-green general" onclick="showChangePasswordModal()">Ganti Password</button>
+</div>
+
+<!-- Modal Owner Login -->
+<div class="modal" id="ownerModal">
+  <div class="modal-content">
+    <h3>🔐 Owner Login</h3>
+    <input type="password" id="ownerPassInput" placeholder="Masukkan Password">
+    <button onclick="loginOwner()">Login</button>
+    <button onclick="closeOwnerModal()">Batal</button>
+  </div>
+</div>
+
+<!-- Modal Admin Login -->
+<div class="modal" id="adminModal">
+  <div class="modal-content">
+    <h3>🔐 Admin Login</h3>
+    <input type="password" id="adminPassInput" placeholder="Masukkan Password">
+    <button onclick="loginAdmin()">Login</button>
+    <button onclick="closeAdminModal()">Batal</button>
+  </div>
+</div>
+
+<!-- Modal Ganti Password -->
+<div class="modal" id="changePasswordModal">
+  <div class="modal-content">
+    <h3>🔐 Ganti Password</h3>
+    <input type="password" id="newOwnerPass" placeholder="Password Owner Baru">
+    <input type="password" id="newAdminPass" placeholder="Password Admin Baru">
+    <button onclick="changePasswords()">Simpan</button>
+    <button onclick="closeChangePasswordModal()">Batal</button>
+  </div>
+</div>
+
+<script>
+// DATA
+let orders = JSON.parse(localStorage.getItem("orders")) || [];
+let ownerPassword = localStorage.getItem("ownerPassword") || "ReiCantik";
+let adminPassword = localStorage.getItem("adminPassword") || "Admin123";
+let isOwner=false;
+let isAdmin=false;
+
+// COPY NOMOR
+function copyNumber(){ navigator.clipboard.writeText("083817235398"); alert("Nomor berhasil disalin!"); }
+
+// HITUNG TOTAL
+document.getElementById("mode").addEventListener("change", hitungTotal);
+document.getElementById("match").addEventListener("input", hitungTotal);
+function hitungTotal(){ let harga=parseInt(document.getElementById("mode").value)||0; let jumlah=parseInt(document.getElementById("match").value)||0; document.getElementById("total").innerText=harga*jumlah; }
+
+// TAMBAH ORDER
+function tambahOrder(){
+  let nama=document.getElementById("nama").value;
+  let whatsapp=document.getElementById("whatsapp").value;
+  let modeText=document.getElementById("mode").selectedOptions[0].text;
+  let match=document.getElementById("match").value;
+  let total=document.getElementById("total").innerText;
+  let file=document.getElementById("bukti").files[0];
+  if(!nama || !whatsapp || !match || !file){ alert("Lengkapi semua data & upload bukti!"); return; }
+  let reader=new FileReader();
+  reader.onload=function(e){
+    orders.push({nama,whatsapp,mode:modeText,match,total,status:"Menunggu Konfirmasi",bukti:e.target.result});
+    localStorage.setItem("orders",JSON.stringify(orders));
+    alert("Order berhasil ditambahkan!");
+    document.getElementById("nama").value="";document.getElementById("whatsapp").value="";document.getElementById("match").value="";document.getElementById("mode").value="";document.getElementById("bukti").value="";hitungTotal();
+    render();
+  }
+  reader.readAsDataURL(file);
+}
+
+// RENDER
+function render(){
+  let queue=document.getElementById("listQueue"); queue.innerHTML="";
+  orders.filter(o=>o.status==="Menunggu Joki").forEach(o=>{ let div=document.createElement("div"); div.className="order"; div.innerHTML=`<b>${o.nama}</b><br>${o.mode}<br>Total: Rp ${o.total}<br>Status: <span class="status-joki">${o.status}</span>`; queue.appendChild(div); });
+
+  let history=document.getElementById("listHistory"); history.innerHTML="";
+  orders.filter(o=>o.status==="Selesai").forEach(o=>{ let div=document.createElement("div"); div.className="order"; div.innerHTML=`<b>${o.nama}</b><br>${o.mode}<br>Total: Rp ${o.total}<br>Status: <span class="status-done">${o.status}</span>`; history.appendChild(div); });
+
+  let admin=document.getElementById("listAdmin"); admin.innerHTML="";
+  if(isOwner||isAdmin){ orders.filter(o=>o.status==="Menunggu Joki").forEach((o,i)=>{ let div=document.createElement("div"); div.className="order"; div.innerHTML=`<b>${o.nama}</b> - ${o.whatsapp}<br>${o.mode}<br>Jumlah Match: ${o.match}<br>Total: Rp ${o.total}<br>Status: <span class="status-joki">${o.status}</span><br><button onclick="jokiSelesai(${i})" class="btn-green general">Joki Selesai</button>`; admin.appendChild(div); }); }
+
+  let confirmDiv=document.getElementById("listConfirm"); confirmDiv.innerHTML="";
+  if(isOwner){
+    orders.filter(o=>o.status==="Menunggu Konfirmasi").forEach((o,i)=>{
+      let div=document.createElement("div"); div.className="order";
+      div.innerHTML=`<b>${o.nama}</b> - ${o.whatsapp}<br>${o.mode}<br>Jumlah Match: ${o.match}<br>Total: Rp ${o.total}<br>Status: <span class="status-waiting">${o.status}</span>
+      <img src="${o.bukti}" alt="Bukti Transfer">
+      <a href="${o.bukti}" download="Bukti-${o.nama}.png" class="btn-blue general">Download Bukti</a>
+      <button onclick="konfirmasi(${i})" class="btn-green general">Konfirmasi</button>
+      <button onclick="tolak(${i})" class="btn-blue general">Tolak</button>`;
+      confirmDiv.appendChild(div);
+    });
+  }
+}
+
+// JOKI SELESAI
+function jokiSelesai(i){ orders[i].status="Selesai"; localStorage.setItem("orders",JSON.stringify(orders)); alert("Order selesai dan masuk History Order!"); render(); }
+
+// KONFIRMASI & TOLAK
+function konfirmasi(i){ orders[i].status="Menunggu Joki"; localStorage.setItem("orders",JSON.stringify(orders)); render(); }
+function tolak(i){ orders[i].status="Ditolak"; localStorage.setItem("orders",JSON.stringify(orders)); render(); }
+
+// NAVIGATION
+function showPage(page){
+  document.getElementById("pageOrder").style.display="none";
+  document.getElementById("pageQueue").style.display="none";
+  document.getElementById("pageHistory").style.display="none";
+  document.getElementById("pageAdmin").style.display="none";
+  document.getElementById("pageConfirm").style.display="none";
+
+  document.getElementById("btnOrder").className="inactive-btn";
+  document.getElementById("btnQueue").className="inactive-btn";
+  document.getElementById("btnHistory").className="inactive-btn";
+  if(document.getElementById("btnAdmin")) document.getElementById("btnAdmin").className="inactive-btn";
+  if(document.getElementById("btnConfirm")) document.getElementById("btnConfirm").className="inactive-btn";
+
+  if(page==="order"){document.getElementById("pageOrder").style.display="block";document.getElementById("btnOrder").className="active-btn";}
+  else if(page==="queue"){document.getElementById("pageQueue").style.display="block";document.getElementById("btnQueue").className="active-btn";}
+  else if(page==="history"){document.getElementById("pageHistory").style.display="block";document.getElementById("btnHistory").className="active-btn";}
+  else if(page==="admin"){if(isOwner||isAdmin){document.getElementById("pageAdmin").style.display="block";document.getElementById("btnAdmin").className="active-btn";}else{alert("Hanya owner/admin yang bisa akses!");}}
+  else if(page==="confirm"){if(isOwner){document.getElementById("pageConfirm").style.display="block";document.getElementById("btnConfirm").className="active-btn";}else{alert("Hanya owner yang bisa akses!");}}
+  render();
+}
+
+// OWNER LOGIN
+function showOwnerModal(){document.getElementById("ownerModal").style.display="flex";}
+function closeOwnerModal(){document.getElementById("ownerModal").style.display="none";}
+function loginOwner(){ let pass=document.getElementById("ownerPassInput").value; if(pass===ownerPassword){ isOwner=true; isAdmin=false; closeOwnerModal(); loginUIUpdate(); alert("Login Owner Berhasil!"); render(); }else{alert("Password Salah!");}}
+
+// ADMIN LOGIN
+function showAdminModal(){document.getElementById("adminModal").style.display="flex";}
+function closeAdminModal(){document.getElementById("adminModal").style.display="none";}
+function loginAdmin(){ let pass=document.getElementById("adminPassInput").value; if(pass===adminPassword){ isAdmin=true; isOwner=false; closeAdminModal(); loginUIUpdate(); alert("Login Admin Berhasil!"); render(); }else{alert("Password Salah!");}}
+
+// LOGOUT
+function logout(){ isOwner=false; isAdmin=false; loginUIUpdate(); render(); }
+
+// LOGIN UI UPDATE
+function loginUIUpdate(){
+  document.getElementById("ownerLoginBtn").style.display=isOwner?"none":"inline-block";
+  document.getElementById("adminLoginBtn").style.display=isAdmin?"none":"inline-block";
+  document.getElementById("logoutBtn").style.display=(isOwner||isAdmin)?"inline-block":"none";
+
+  if(!isOwner&&!isAdmin && document.getElementById("btnAdmin")) document.getElementById("btnAdmin").remove();
+  if(!isOwner && document.getElementById("btnConfirm")) document.getElementById("btnConfirm").remove();
+
+  if((isOwner||isAdmin) && !document.getElementById("btnAdmin")){ let btn=document.createElement("button"); btn.id="btnAdmin"; btn.className="inactive-btn"; btn.innerText="Admin Antrian"; btn.onclick=function(){showPage("admin");}; document.getElementById("navButtons").appendChild(btn);}
+  if(isOwner && !document.getElementById("btnConfirm")){ let btn=document.createElement("button"); btn.id="btnConfirm"; btn.className="inactive-btn"; btn.innerText="Konfirmasi Transaksi"; btn.onclick=function(){showPage("confirm");}; document.getElementById("navButtons").appendChild(btn);}
+}
+
+// GANTI PASSWORD
+function showChangePasswordModal(){document.getElementById("changePasswordModal").style.display="flex";}
+function closeChangePasswordModal(){document.getElementById("changePasswordModal").style.display="none";}
+function changePasswords(){
+  let newOwner=document.getElementById("newOwnerPass").value;
+  let newAdmin=document.getElementById("newAdminPass").value;
+  if(newOwner) { ownerPassword=newOwner; localStorage.setItem("ownerPassword",newOwner); }
+  if(newAdmin) { adminPassword=newAdmin; localStorage.setItem("adminPassword",newAdmin); }
+  alert("Password berhasil diubah!");
+  document.getElementById("newOwnerPass").value="";document.getElementById("newAdminPass").value="";
+  closeChangePasswordModal();
+}
+
+// INITIAL RENDER
+render();
+</script>
+</body>
+</html>
